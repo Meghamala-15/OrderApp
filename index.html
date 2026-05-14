@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mega Orders</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f0f4f8;
+}
+
+header {
+    background: linear-gradient(135deg, #ff6f61, #ff9a8d);
+    color: white;
+    text-align: center;
+    padding: 25px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+header h1 { margin: 0; font-size: 2.5rem; letter-spacing: 1px; }
+header p { margin-top: 5px; font-size: 1.1rem; opacity: 0.9; }
+
+.food-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    padding: 25px;
+}
+
+.food-card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.food-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.2); }
+.food-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; }
+.food-card h4 { margin: 8px 0; font-size: 1.1rem; color: #333; }
+.food-card p { margin: 5px 0; font-weight: bold; color: #ff6f61; }
+
+button {
+    background: linear-gradient(135deg, #ff6f61, #ff9a8d);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 25px;
+    margin-top: 10px;
+    font-weight: bold;
+    transition: background 0.3s, transform 0.2s;
+}
+
+button:hover { background: linear-gradient(135deg, #e65b50, #ff7b66); transform: scale(1.05); }
+
+#cart {
+    background: linear-gradient(145deg, #ffffff, #ffe6e0);
+    padding: 25px;
+    margin: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+#cart h2 { margin-top: 0; color: #ff6f61; text-align: center; }
+#cart-items { list-style: none; padding-left: 0; margin-bottom: 15px; }
+#cart-items li { margin-bottom: 8px; font-size: 1rem; color: #555; display: flex; justify-content: space-between; align-items: center; }
+
+.remove-btn {
+    background: #ff6f61;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    border-radius: 12px;
+}
+.remove-btn:hover { background: #e65b50; }
+
+#total { font-size: 1.2rem; font-weight: bold; color: #ff6f61; }
+
+/* Modal styles */
+#receiptModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,0.5); }
+#receiptContent {
+    background: linear-gradient(135deg, #ffe6e0, #fff3f1);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+}
+#receiptContent h2 { margin-top: 0; color: #ff6f61; }
+#receiptContent ul { list-style: none; padding-left: 0; text-align: left; margin: 15px 0; }
+#receiptContent ul li { margin: 6px 0; color: #333; }
+#receiptContent p { font-weight: bold; font-size: 1.1rem; color: #ff6f61; margin-top: 15px; }
+#closeReceipt {
+    margin-top: 20px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #ff6f61, #ff9a8d);
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+#closeReceipt:hover { background: linear-gradient(135deg, #e65b50, #ff7b66); transform: scale(1.05); }
+
+@keyframes fadeIn { from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);} }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Mega Orders</h1>
+    <p>Delicious food at your fingertips!</p>
+</header>
+
+<main>
+    <section id="food-items" class="food-grid"></section>
+
+    <section id="cart">
+        <h2>Your Cart</h2>
+        <ul id="cart-items"></ul>
+        <p><strong>Total:</strong> ₹<span id="total">0.00</span></p>
+        <button id="checkout">Checkout</button>
+    </section>
+</main>
+
+<!-- Receipt Modal -->
+<div id="receiptModal">
+    <div id="receiptContent">
+        <h2>Mega Orders Receipt</h2>
+        <ul id="receiptItems"></ul>
+        <p>Total: ₹<span id="receiptTotal">0.00</span></p>
+        <p>Thank you! Visit again! 🍽️</p>
+        <button id="closeReceipt">Close</button>
+    </div>
+</div>
+
+<script>
+const foodItems = [
+    {id:1, name:"Margherita Pizza", price:899, icon:"🍕", image:"./images/PIZZA-MARGHERITA.jpg"},
+    {id:2, name:"Cheeseburger", price:749, icon:"🍔", image:"./images/CHEESE BURGER.jpg"},
+    {id:3, name:"Caesar Salad", price:699, icon:"🥗", image:"./images/salad.jpg"},
+    {id:4, name:"French Fries", price:399, icon:"🍟", image:"./images/FRENCH FRIES.jpg"},
+    {id:5, name:"Sushi Roll", price:1299, icon:"🍣", image:"./images/SUSHI.jpg"},
+    {id:6, name:"Tacos", price:949, icon:"🌮", image:"./images/TACO.jpg"},
+    {id:7, name:"Spaghetti Bolognese", price:1099, icon:"🍝", image:"./images/SPAGHETTI BOLOGNESE.jpg"},
+    {id:8, name:"BBQ Ribs", price:1449, icon:"🍖", image:"./images/BBQ RIBS.jpg"},
+    {id:9, name:"Grilled Chicken", price:1199, icon:"🍗", image:"./images/GRILLED CHICKEN.jpg"},
+    {id:10, name:"Pancakes", price:599, icon:"🥞", image:"./images/PANCAKE.jpg"},
+];
+
+const foodContainer = document.getElementById('food-items');
+const cartItems = document.getElementById('cart-items');
+const totalElement = document.getElementById('total');
+const receiptModal = document.getElementById('receiptModal');
+const receiptItems = document.getElementById('receiptItems');
+const receiptTotal = document.getElementById('receiptTotal');
+const closeReceipt = document.getElementById('closeReceipt');
+let cart = [];
+
+function displayFoodItems() {
+    foodItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'food-card';
+        card.innerHTML = `
+            <img src="${item.image}" alt="${item.name}">
+            <h4>${item.name}</h4>
+            <p>₹${item.price}</p>
+            <button onclick="addToCart(${item.id})">Add to Cart</button>
+        `;
+        foodContainer.appendChild(card);
+    });
+}
+
+function addToCart(id) {
+    const item = foodItems.find(f => f.id === id);
+    cart.push(item);
+    updateCart();
+}
+
+function removeOne(id) {
+    const index = cart.findIndex(i => i.id === id);
+    if(index !== -1) cart.splice(index, 1);
+    updateCart();
+}
+
+function updateCart() {
+    cartItems.innerHTML = '';
+    const counts = {};
+    cart.forEach(item => counts[item.id] = (counts[item.id] || 0) + 1);
+    const uniqueIds = [...new Set(cart.map(i => i.id))];
+    let total = 0;
+
+    uniqueIds.forEach(id => {
+        const item = foodItems.find(f => f.id === id);
+        const li = document.createElement('li');
+        li.innerHTML = `${item.icon} ${item.name} x${counts[id]} - ₹${item.price * counts[id]} <button class="remove-btn" onclick="removeOne(${id})">Remove</button>`;
+        cartItems.appendChild(li);
+        total += item.price * counts[id];
+    });
+
+    totalElement.textContent = total.toFixed(2);
+}
+
+document.getElementById('checkout').addEventListener('click', () => {
+    if(cart.length === 0){ alert("Your cart is empty!"); return; }
+
+    receiptItems.innerHTML = '';
+    const counts = {};
+    cart.forEach(item => counts[item.id] = (counts[item.id] || 0) + 1);
+    const uniqueIds = [...new Set(cart.map(i => i.id))];
+    let totalAmount = 0;
+
+    uniqueIds.forEach(id => {
+        const item = foodItems.find(f => f.id === id);
+        const li = document.createElement('li');
+        li.textContent = `${item.icon} ${item.name} x${counts[id]} - ₹${item.price * counts[id]}`;
+        receiptItems.appendChild(li);
+        totalAmount += item.price * counts[id];
+    });
+
+    receiptTotal.textContent = totalAmount.toFixed(2);
+    receiptModal.style.display = 'block';
+    cart = [];
+    updateCart();
+});
+
+closeReceipt.addEventListener('click', () => { receiptModal.style.display = 'none'; });
+window.addEventListener('click', (e) => { if(e.target === receiptModal) receiptModal.style.display = 'none'; });
+
+displayFoodItems();
+</script>
+
+</body>
+</html>
