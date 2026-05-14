@@ -46,7 +46,7 @@ mega-orders/
 
 ## 🌐 Live Demo
 
-[Click Here to View Website](https://megaorders.netlify.app/)
+https://megaorders.netlify.app/
 
 ---
 
