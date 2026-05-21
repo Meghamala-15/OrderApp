@@ -23,7 +23,16 @@ Mega Orders is a simple and responsive food ordering web application built using
 
 ---
 
+## 🖼️ Screenshots
 
+### Menu Page
+![Cuisine](./screenshots/cuisine.png)
+
+### Check Out
+![Check Out](./screenshots/checkout.png)
+
+### Receipt
+![Receipt](./screenshots/receipt.png)
 
 
 ## 📂 Project Structure
